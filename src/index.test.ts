@@ -40,7 +40,7 @@ test("Can make a transaction", async () => {
     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
   );
 
-  const ONE_ETH = 1000000000000000000n;
+  const ONE_ETH = 1_000000000000000000n;
 
   const res1 = await signer.sendTransaction({
     from: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
