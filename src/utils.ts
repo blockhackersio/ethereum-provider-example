@@ -1,16 +1,23 @@
-import { spawn } from "child_process";
+import { ChildProcess, spawn } from "child_process";
 import axios from "axios";
 
 export type HardHatService = {
-  ready: () => Promise<void>;
-  close: () => Promise<void>;
+  isRunning: () => boolean;
+  start: () => Promise<void>;
+  stop: () => Promise<void>;
 };
 
 const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
-export function runHardhatInstance(): HardHatService {
-  const cp = spawn("pnpm", ["hardhat", "node"]);
 
-  async function ready() {
+export function createHardhatService(): HardHatService {
+  let cp: ChildProcess | null = null;
+
+  async function start() {
+    if (isRunning()) {
+      await stop();
+    }
+
+    cp = spawn("pnpm", ["hardhat", "node"]);
     while (true) {
       try {
         await axios.get("http://127.0.0.1:8545");
@@ -21,7 +28,8 @@ export function runHardhatInstance(): HardHatService {
     }
   }
 
-  async function close() {
+  async function stop() {
+    if (!cp) return;
     cp.kill();
     while (true) {
       if (cp.killed) {
@@ -29,6 +37,11 @@ export function runHardhatInstance(): HardHatService {
       }
       await sleep(100);
     }
+    cp = null;
   }
-  return { close, ready };
+
+  function isRunning() {
+    return !!cp;
+  }
+  return { start, stop, isRunning };
 }

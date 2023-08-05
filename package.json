@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "test": "jest --passWithNoTests",
+    "test": "jest --runInBand --passWithNoTests",
     "dev": "rollup -c rollup.config.js -w",
     "build": "tsc && rollup -c rollup.config.js",
     "hh": "hardhat node"
