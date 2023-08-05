@@ -22,7 +22,7 @@ afterEach(async () => {
   await backend.close();
 });
 
-test("Send ETH", async () => {
+test("Check balance", async () => {
   let bal = await provider.getBalance(
     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
   );
