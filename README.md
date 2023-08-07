@@ -15,7 +15,7 @@ const pk = secp256k1.ProjectivePoint.BASE.multiply(sk)
   .toRawBytes(false) // false here means uncompressed which adds 0x04 to start of bytes
   .slice(1);
 
-// Our address
+// Public keys are not addresses this is how we get Our address
 const address = "0x" + bytesToHex(keccak_256(pk).slice(-20));
 
 // Their address
