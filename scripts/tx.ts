@@ -19,66 +19,65 @@ async function main() {
   const address = "0x" + bytesToHex(keccak_256(pk).slice(-20));
 
   // Their address
-  const themBigInt = 0x70997970c51812dc3a010c7d01b50e0d17dc79c8n;
-  const them = "0x" + themBigInt.toString(16);
+  const them = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8";
 
   // Here are our basic transaction details
   const tx = {
-    chainId: bigIntToUnpaddedBytes(0x7a69n),
-    nonce: new Uint8Array(0),
-    maxPriorityFeePerGas: bigIntToUnpaddedBytes(0xan),
-    maxFeePerGas: bigIntToUnpaddedBytes(875000000n),
-    gasLimit: bigIntToUnpaddedBytes(0x5208n),
-    to: bigIntToUnpaddedBytes(themBigInt),
-    value: bigIntToUnpaddedBytes(0xde0b6b3a7640000n),
-    data: new Uint8Array(0),
+    chainId: 31337n,
+    nonce: 0n,
+    maxPriorityFeePerGas: 10n,
+    maxFeePerGas: 875000000n,
+    gasLimit: 21000n,
+    to: BigInt(them),
+    value: 1_000000000000000000n,
+    data: 0n,
     accessList: [],
   };
 
   // Encode the transaction details as a Uint8Array using RLP encoding
-  const message = new Uint8Array([
+  const raw = new Uint8Array([
     0x02,
     ...RLP.encode([
-      tx.chainId,
-      tx.nonce,
-      tx.maxPriorityFeePerGas,
-      tx.maxFeePerGas,
-      tx.gasLimit,
-      tx.to,
-      tx.value,
+      bigIntToUnpaddedBytes(tx.chainId),
+      bigIntToUnpaddedBytes(tx.nonce),
+      bigIntToUnpaddedBytes(tx.maxPriorityFeePerGas),
+      bigIntToUnpaddedBytes(tx.maxFeePerGas),
+      bigIntToUnpaddedBytes(tx.gasLimit),
+      bigIntToUnpaddedBytes(tx.to),
+      bigIntToUnpaddedBytes(tx.value),
       undefined,
       tx.accessList,
     ]),
   ]);
 
   // Get the message hash
-  const msgHash = keccak_256(message);
+  const msgHash = keccak_256(raw);
 
   // Generate a signature for the hash (r & s)
   const sig = secp256k1.sign(msgHash, sk);
 
   const signedTx = {
     ...tx,
-    v: bigIntToUnpaddedBytes(0x1n), // This is required for signature recovery
-    r: bigIntToUnpaddedBytes(sig.r),
-    s: bigIntToUnpaddedBytes(sig.s),
+    v: 0x1n, // This is required for signature recovery
+    r: sig.r,
+    s: sig.s,
   };
 
   const signedRaw = new Uint8Array([
     0x02,
     ...RLP.encode([
-      signedTx.chainId,
-      signedTx.nonce,
-      signedTx.maxPriorityFeePerGas,
-      signedTx.maxFeePerGas,
-      signedTx.gasLimit,
-      signedTx.to,
-      signedTx.value,
+      bigIntToUnpaddedBytes(signedTx.chainId),
+      bigIntToUnpaddedBytes(signedTx.nonce),
+      bigIntToUnpaddedBytes(signedTx.maxPriorityFeePerGas),
+      bigIntToUnpaddedBytes(signedTx.maxFeePerGas),
+      bigIntToUnpaddedBytes(signedTx.gasLimit),
+      bigIntToUnpaddedBytes(signedTx.to),
+      bigIntToUnpaddedBytes(signedTx.value),
       signedTx.data,
       signedTx.accessList,
-      signedTx.v,
-      signedTx.r,
-      signedTx.s,
+      bigIntToUnpaddedBytes(signedTx.v),
+      bigIntToUnpaddedBytes(signedTx.r),
+      bigIntToUnpaddedBytes(signedTx.s),
     ]),
   ]);
 
@@ -137,10 +136,12 @@ main().catch((error) => {
   process.exitCode = 1;
 });
 
+// Helper for displaying eth amounts from a hex string
 function hexToEth(hex: string) {
   return Number(BigInt(hex).toString()) / 1e18;
 }
 
+// Helper for preparing bigints for RLP encoding
 function bigIntToUnpaddedBytes(value: bigint): Uint8Array {
   // First we get the hex string from the bigint
 
