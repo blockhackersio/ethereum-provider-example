@@ -13,11 +13,20 @@ class ProviderRpcError extends Error {
   }
 }
 
+class ProviderError extends Error {
+  constructor(
+    public message: string,
+    public code: number,
+    public data?: unknown
+  ) {
+    super(message);
+  }
+}
 export class Provider implements ethers.providers.ExternalProvider {
   constructor(
     private account: Account,
-    public readonly host = "http://127.0.0.1:8545",
-    private id = 0
+    public readonly host = "http://127.0.0.1:8543",
+    private id = 41
   ) {}
 
   private getId() {
@@ -28,33 +37,50 @@ export class Provider implements ethers.providers.ExternalProvider {
     method: string;
     params?: Array<any>;
   }) {
-    const res = await axios.post(this.host, {
-      jsonrpc: "2.0",
-      method: request.method,
-      params: request.params,
-      id: this.getId(),
-    });
-
-    return res.data.result;
+    try {
+      const res = await axios.post(this.host, {
+        jsonrpc: "2.0",
+        method: request.method,
+        params: request.params,
+        id: this.getId(),
+      });
+      return res.data.result;
+    } catch (err) {
+      const e = new ProviderError(`${err}`, 4200);
+    }
   }
 
   async request(request: { method: string; params?: Array<any> }) {
+    console.log(JSON.stringify({ request }));
+
     if (
-      ["eth_sign", "eth_signTransaction", "eth_call"].includes(request.method)
+      [
+        "eth_sign",
+        //"eth_signTransaction",
+        // "eth_call",
+      ].includes(request.method)
     ) {
       throw new ProviderRpcError("Unauthorized", 4100);
+    }
+    if (["eth_accounts"].includes(request.method)) {
+      const addr = `0x${this.account.getAddress()}`;
+
+      const result = [addr];
+      console.log(JSON.stringify({ request, result }));
+      return result;
     }
 
     if (["eth_sendTransaction"].includes(request.method)) {
       const [txData] = request.params ?? [];
+      if (!txData.gasLimit) {
+        txData.gasLimit = 90000;
+      }
 
-      const tx = FeeMarketEIP1559Transaction.fromTxData({
-        chainId: 31337,
-        gasLimit: 21000,
-        maxFeePerGas: 875000000,
-        maxPriorityFeePerGas: 10,
-        ...txData,
-      });
+      if (!txData.maxFeePerGas) {
+        txData.maxFeePerGas = 875000000;
+      }
+
+      const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
       const signedTx = this.account.sign(tx);
       const txHex = "0x" + signedTx.serialize().toString("hex");
 
@@ -65,7 +91,8 @@ export class Provider implements ethers.providers.ExternalProvider {
       this.account.incrementNonce();
       return res;
     }
-
-    return await this._executeRequest(request);
+    const result = await this._executeRequest(request);
+    console.log(JSON.stringify({ request, result }));
+    return result;
   }
 }

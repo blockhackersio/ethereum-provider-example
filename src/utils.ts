@@ -20,7 +20,7 @@ export function createHardhatService(): HardHatService {
     cp = spawn("pnpm", ["hardhat", "node"]);
     while (true) {
       try {
-        await axios.get("http://127.0.0.1:8545");
+        await axios.get("http://127.0.0.1:8543");
         return;
       } catch (err) {
         continue;

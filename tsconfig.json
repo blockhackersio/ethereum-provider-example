@@ -2,13 +2,14 @@
   "compilerOptions": {
     "lib": ["ESNext", "dom"],
     "target": "ES2022",
-    "module": "nodenext",
+    "module": "CommonJS",
     "strict": true,
     "noEmit": true,
     "isolatedModules": true,
+    "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts", "hardhat.config.ts"]
 }

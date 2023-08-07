@@ -1,7 +1,7 @@
-import { FeeMarketEIP1559Transaction, Transaction } from "@ethereumjs/tx";
+import { FeeMarketEIP1559Transaction } from "@ethereumjs/tx";
 import { secp256k1 } from "@noble/curves/secp256k1";
 import { keccak_256 } from "@noble/hashes/sha3";
-import { numberToBytesBE } from "@noble/curves/abstract/utils";
+import { numberToBytesBE, bytesToHex } from "@noble/curves/abstract/utils";
 import { hexToBytes } from "@noble/hashes/utils";
 
 function privateToPub(privateKey: Uint8Array) {
@@ -37,6 +37,10 @@ export class Account {
     this.publicKey = privateToPub(privateKey);
     this.address = pubToAddress(this.publicKey);
     this.nonce = 0;
+  }
+
+  getAddress() {
+    return bytesToHex(this.address);
   }
 
   getNonce() {
