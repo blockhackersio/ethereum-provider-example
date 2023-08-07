@@ -3,21 +3,24 @@ import { secp256k1 } from "@noble/curves/secp256k1";
 import { keccak_256 } from "@noble/hashes/sha3";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import axios from "axios";
+import assert from "assert";
 
 async function main() {
+  // Get the secret key
   const sk =
     0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80n;
 
+  // Generate the public key
   const pk = secp256k1.ProjectivePoint.BASE.multiply(sk)
     .toRawBytes(false) // false here means uncompressed which adds 0x04 to start of bytes
     .slice(1);
 
-  // Us
+  // Our address
   const address = "0x" + bytesToHex(keccak_256(pk).slice(-20));
 
-  // Them
-  const to = 0x70997970c51812dc3a010c7d01b50e0d17dc79c8n;
-  const them = "0x" + to.toString(16);
+  // Their address
+  const themBigInt = 0x70997970c51812dc3a010c7d01b50e0d17dc79c8n;
+  const them = "0x" + themBigInt.toString(16);
 
   // Here are our basic transaction details
   const tx = {
@@ -26,7 +29,7 @@ async function main() {
     maxPriorityFeePerGas: bigIntToUnpaddedBytes(0xan),
     maxFeePerGas: bigIntToUnpaddedBytes(875000000n),
     gasLimit: bigIntToUnpaddedBytes(0x5208n),
-    to: bigIntToUnpaddedBytes(BigInt(to)),
+    to: bigIntToUnpaddedBytes(themBigInt),
     value: bigIntToUnpaddedBytes(0xde0b6b3a7640000n),
     data: new Uint8Array(0),
     accessList: [],
@@ -86,6 +89,7 @@ async function main() {
     params: [address],
     id: 1,
   });
+  assert(BigInt(res.data.result) === 10000_000000000000000000n);
   console.log(address + " " + hexToEth(res.data.result) + " ETH");
 
   // Get their balance
@@ -95,6 +99,7 @@ async function main() {
     params: [them],
     id: 1,
   });
+  assert(BigInt(res.data.result) === 10000_000000000000000000n);
   console.log(them + " " + hexToEth(res.data.result) + " ETH");
 
   // Submit signed transaction
@@ -104,6 +109,7 @@ async function main() {
     params: ["0x" + bytesToHex(signedRaw)],
     id: 2,
   });
+  console.log("Transaction submitted:\n " + res.data.result);
 
   // Get our balance
   res = await axios.post("http://127.0.0.1:8545", {
@@ -112,6 +118,7 @@ async function main() {
     params: [address],
     id: 3,
   });
+  assert(BigInt(res.data.result) === 9998_999981625000000000n);
   console.log(address + " " + hexToEth(res.data.result) + " ETH");
 
   // Get their balance
@@ -121,6 +128,7 @@ async function main() {
     params: [them],
     id: 1,
   });
+  assert(BigInt(res.data.result) === 10001_000000000000000000n);
   console.log(them + " " + hexToEth(res.data.result) + " ETH");
 }
 
