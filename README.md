@@ -3,6 +3,9 @@
 This repo shows how to create and submit a raw ethereum transaction
 
 ```ts
+// This keeps track of our rpc calls
+let rpcId = 0;
+
 // Get the secret key
 const sk =
   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80n;
@@ -18,10 +21,41 @@ const address = "0x" + bytesToHex(keccak_256(pk).slice(-20));
 // Their address
 const them = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8";
 
+// Get the chainId
+let res = await axios.post("http://127.0.0.1:8545", {
+  jsonrpc: "2.0",
+  method: "eth_chainId",
+  params: [],
+  id: ++rpcId,
+});
+
+const chainId = BigInt(res.data.result);
+console.log(`The chainId is ${chainId}`);
+
+// Get our balance
+res = await axios.post("http://127.0.0.1:8545", {
+  jsonrpc: "2.0",
+  method: "eth_getBalance",
+  params: [address],
+  id: ++rpcId,
+});
+assert(BigInt(res.data.result) === 10000_000000000000000000n);
+console.log(address + " " + hexToEth(res.data.result) + " ETH");
+
+// Get their balance
+res = await axios.post("http://127.0.0.1:8545", {
+  jsonrpc: "2.0",
+  method: "eth_getBalance",
+  params: [them],
+  id: ++rpcId,
+});
+assert(BigInt(res.data.result) === 10000_000000000000000000n);
+console.log(them + " " + hexToEth(res.data.result) + " ETH");
+
 // Here are our basic transaction details
 const tx = {
-  chainId: 31337n,
-  nonce: 0n,
+  chainId,
+  nonce: 0n, // This must increase for every tx
   maxPriorityFeePerGas: 10n,
   maxFeePerGas: 875000000n,
   gasLimit: 21000n,
@@ -31,17 +65,19 @@ const tx = {
   accessList: [],
 };
 
+console.log(`The Transaction is `, tx);
+
 // Encode the transaction details as a Uint8Array using RLP encoding
 const raw = new Uint8Array([
   0x02,
   ...RLP.encode([
-    bigIntToUnpaddedBytes(tx.chainId),
-    bigIntToUnpaddedBytes(tx.nonce),
-    bigIntToUnpaddedBytes(tx.maxPriorityFeePerGas),
-    bigIntToUnpaddedBytes(tx.maxFeePerGas),
-    bigIntToUnpaddedBytes(tx.gasLimit),
-    bigIntToUnpaddedBytes(tx.to),
-    bigIntToUnpaddedBytes(tx.value),
+    bigIntToBytes(tx.chainId),
+    bigIntToBytes(tx.nonce),
+    bigIntToBytes(tx.maxPriorityFeePerGas),
+    bigIntToBytes(tx.maxFeePerGas),
+    bigIntToBytes(tx.gasLimit),
+    bigIntToBytes(tx.to),
+    bigIntToBytes(tx.value),
     undefined,
     tx.accessList,
   ]),
@@ -60,50 +96,36 @@ const signedTx = {
   s: sig.s,
 };
 
+console.log(`The Signed Transaction is `, signedTx);
+
 const signedRaw = new Uint8Array([
   0x02,
   ...RLP.encode([
-    bigIntToUnpaddedBytes(signedTx.chainId),
-    bigIntToUnpaddedBytes(signedTx.nonce),
-    bigIntToUnpaddedBytes(signedTx.maxPriorityFeePerGas),
-    bigIntToUnpaddedBytes(signedTx.maxFeePerGas),
-    bigIntToUnpaddedBytes(signedTx.gasLimit),
-    bigIntToUnpaddedBytes(signedTx.to),
-    bigIntToUnpaddedBytes(signedTx.value),
+    bigIntToBytes(signedTx.chainId),
+    bigIntToBytes(signedTx.nonce),
+    bigIntToBytes(signedTx.maxPriorityFeePerGas),
+    bigIntToBytes(signedTx.maxFeePerGas),
+    bigIntToBytes(signedTx.gasLimit),
+    bigIntToBytes(signedTx.to),
+    bigIntToBytes(signedTx.value),
     signedTx.data,
     signedTx.accessList,
-    bigIntToUnpaddedBytes(signedTx.v),
-    bigIntToUnpaddedBytes(signedTx.r),
-    bigIntToUnpaddedBytes(signedTx.s),
+    bigIntToBytes(signedTx.v),
+    bigIntToBytes(signedTx.r),
+    bigIntToBytes(signedTx.s),
   ]),
 ]);
 
-// Get our balance
-let res = await axios.post("http://127.0.0.1:8545", {
-  jsonrpc: "2.0",
-  method: "eth_getBalance",
-  params: [address],
-  id: 1,
-});
-assert(BigInt(res.data.result) === 10000_000000000000000000n);
-console.log(address + " " + hexToEth(res.data.result) + " ETH");
+const rawSignedTx = "0x" + bytesToHex(signedRaw);
 
-// Get their balance
-res = await axios.post("http://127.0.0.1:8545", {
-  jsonrpc: "2.0",
-  method: "eth_getBalance",
-  params: [them],
-  id: 1,
-});
-assert(BigInt(res.data.result) === 10000_000000000000000000n);
-console.log(them + " " + hexToEth(res.data.result) + " ETH");
+console.log(`The Raw Signed Transaction is:\n `, rawSignedTx);
 
 // Submit signed transaction
 res = await axios.post("http://127.0.0.1:8545", {
   jsonrpc: "2.0",
   method: "eth_sendRawTransaction",
-  params: ["0x" + bytesToHex(signedRaw)],
-  id: 2,
+  params: [rawSignedTx],
+  id: ++rpcId,
 });
 console.log("Transaction submitted:\n " + res.data.result);
 
@@ -112,7 +134,7 @@ res = await axios.post("http://127.0.0.1:8545", {
   jsonrpc: "2.0",
   method: "eth_getBalance",
   params: [address],
-  id: 3,
+  id: ++rpcId,
 });
 assert(BigInt(res.data.result) === 9998_999981625000000000n);
 console.log(address + " " + hexToEth(res.data.result) + " ETH");
@@ -122,7 +144,7 @@ res = await axios.post("http://127.0.0.1:8545", {
   jsonrpc: "2.0",
   method: "eth_getBalance",
   params: [them],
-  id: 1,
+  id: ++rpcId,
 });
 assert(BigInt(res.data.result) === 10001_000000000000000000n);
 console.log(them + " " + hexToEth(res.data.result) + " ETH");
