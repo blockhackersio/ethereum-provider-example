@@ -94,7 +94,8 @@ async function main() {
 
   const signedTx = {
     ...tx,
-    v: 0x1n, // This is required for signature recovery
+    // v: 0x1n, // This is required for signature recovery
+    v: BigInt(sig.recovery), //+ 27n + 2n * BigInt(chainId),
     r: sig.r,
     s: sig.s,
   };

@@ -11,6 +11,10 @@ contract Counter {
         return count;
     }
 
+    function setCount(uint256 _count) public {
+        count = _count;
+    }
+
     function increment() public {
         count++;
     }
