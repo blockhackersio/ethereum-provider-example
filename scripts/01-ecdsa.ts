@@ -31,23 +31,20 @@ async function main() {
   const compact = sig.toCompactRawBytes();
   const { r, s, recovery: v } = sig;
 
-  // This sig can
-  const ethSig = {
-    r,
-    s,
-    v, // USed to recover
-  };
-
   console.log("Account", {
     PrivKey: `0x${sk.toString(16)}`,
     PubKey: `0x${bytesToHex(pk)}`,
     Address: address,
   });
-  console.log("ECDSASignature", ethSig);
+  console.log("ECDSASignature", {
+    r,
+    s,
+    v,
+  });
 
   // Verify signature
   const pkFromSig = secp256k1.Signature.fromCompact(compact)
-    .addRecoveryBit(ethSig.v)
+    .addRecoveryBit(v)
     .recoverPublicKey(msgHash)
     .toRawBytes(false) // false here means uncompressed which adds 0x04 to start of bytes
     .slice(1);
