@@ -1,4 +1,4 @@
-# Create and submit a raw Ethereum Transaction
+# 🥩 Ethereum in the RAW 
 
 This repo shows how to create and submit a raw ethereum transaction. 
 
