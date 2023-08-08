@@ -1,4 +1,4 @@
-# 🥩 Nude Ethereum 🫢
+# 🥩 Ethereum in the Raw 🫢
 
 This repo shows how to create and submit a raw ethereum transaction. 
 
