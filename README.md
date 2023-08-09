@@ -11,6 +11,7 @@ This repo explores raw ethereum interactions and cryptography. It is partially i
 - [ ] Submit a EIP-4337 UserOperation
 - [ ] Paymaster
 - [ ] BLS signature aggregation
+- [ ] KZG commitment
 - [ ] Zero Knowledge Proof
 - [ ] Keystore Contract [c vitalik](https://vitalik.eth.limo/general/2023/06/09/three_transitions.html)
 
