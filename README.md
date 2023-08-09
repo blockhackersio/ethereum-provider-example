@@ -1,6 +1,6 @@
 # 🥩 Ethereum in the Raw 🫢
 
-This repo explores raw ethereum interactions and cryptography. It is partially in order to understand the protocol better at a deeper level myself but also to inform future projects. 
+This repo explores raw ethereum interactions and cryptography. It is partially in order to understand the protocol better at a deeper level myself but also to inform future projects I undertake. 
 
 - [x] [Basic ECDSA Signatures and generating addresses](scripts/01-ecdsa.ts)
 - [x] [Send ETH to anyone](scripts/02-transaction.ts)
