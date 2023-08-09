@@ -6,7 +6,7 @@ This repo shows how to create and submit a raw ethereum transaction.
 - [x] [Basic ECDSA Signatures and generating addresses](scripts/01-ecdsa.ts)
 - [x] [Send ETH to anyone](scripts/02-transaction.ts)
 - [x] [Interact with a smart contract](scripts/03-contract.ts)
-- [x] Stealth Addresses
+- [x] [Stealth Addresses](scripts/04-stealth.ts)
 - [ ] Deploy a contract
 - [ ] Submit a EIP-4337 UserOperation
 - [ ] Create a simple EIP-1193 provider
