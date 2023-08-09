@@ -10,5 +10,6 @@ This repo shows how to create and submit a raw ethereum transaction.
 - [ ] Deploy a contract
 - [ ] Submit a EIP-4337 UserOperation
 - [ ] Create a simple EIP-1193 provider
+- [ ] Zero Knowledge Proof
 
 _Note this code is for illustrative purposes only and is not production code and is not meant to be used for production in anyway._
