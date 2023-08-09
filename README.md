@@ -7,6 +7,7 @@ This repo explores raw ethereum interactions and cryptography. It is partially i
 - [x] [Interact with a smart contract](scripts/03-contract.ts)
 - [x] [Stealth Addresses](scripts/04-stealth.ts)
 - [ ] Deploy a contract
+- [ ] CREATE2 address generation
 - [ ] Create a simple EIP-1193 provider
 - [ ] Submit a EIP-4337 UserOperation
 - [ ] Paymaster
