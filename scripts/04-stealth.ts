@@ -7,44 +7,51 @@ import { bytesToHex } from "@noble/hashes/utils";
 import assert from "assert";
 
 // Bob key
-let b = secp256k1.utils.randomPrivateKey();
-const B = secp256k1.ProjectivePoint.fromPrivateKey(b);
+let B_sk = secp256k1.utils.randomPrivateKey();
+const B_pk = secp256k1.ProjectivePoint.fromPrivateKey(B_sk);
 
 // Alice key
-let a = secp256k1.utils.randomPrivateKey();
-const A = secp256k1.ProjectivePoint.fromPrivateKey(a);
+let A_sk = secp256k1.utils.randomPrivateKey();
+const A_pk = secp256k1.ProjectivePoint.fromPrivateKey(A_sk);
 
 // Secrets
-const S_b = A.multiply(bytesToNumberBE(b)).x;
-const S_a = B.multiply(bytesToNumberBE(a)).x;
+const S_1 = A_pk.multiply(bytesToNumberBE(B_sk)).x;
+const S_2 = B_pk.multiply(bytesToNumberBE(A_sk)).x;
 
-assert(S_a === S_b, "Shared secrets must match");
+assert(S_2 === S_1, "Shared secrets must match");
 
 // Calculate the hash of S abailable to both Bob and Alice
-const hashS = bytesToNumberBE(keccak_256(numberToBytesBE(S_a, 32)));
+const hashS = bytesToNumberBE(keccak_256(numberToBytesBE(S_2, 32)));
 
 // P is Bob's public key available to both Bob and Alice
 // Adding projects out on the Z axis so we need to go back to Affine representation
-const P_ba = B.add(secp256k1.ProjectivePoint.BASE.multiply(hashS)).toAffine();
+const P_pk = B_pk.add(secp256k1.ProjectivePoint.BASE.multiply(hashS))
+  .toRawBytes(false)
+  .slice(1);
+
+const P_address = bytesToHex(keccak_256(P_pk).slice(-20));
 
 // p is Bob's private key only available to Bob because only he knows b
-const p = (bytesToNumberBE(b) + hashS) % secp256k1.CURVE.n;
+const P_sk = (bytesToNumberBE(B_sk) + hashS) % secp256k1.CURVE.n;
 
 // Let's calculate P from the private key
-const P = secp256k1.ProjectivePoint.fromPrivateKey(p);
+const P_pk2 = secp256k1.ProjectivePoint.fromPrivateKey(P_sk)
+  .toRawBytes(false)
+  .slice(1);
 
-assert(P_ba.x === P.x, "Public keys dont match");
+assert(bytesToHex(P_pk) === bytesToHex(P_pk2), "Public keys dont match");
 
 console.log("BobsMetaAddress", {
-  b: "0x" + bytesToHex(b),
-  B: "0x" + bytesToHex(B.toRawBytes().slice(1)),
+  sk: "0x" + bytesToHex(B_sk),
+  pk: "0x" + bytesToHex(B_pk.toRawBytes().slice(1)),
 });
 console.log("AlicesEphemeralAddress", {
-  a: "0x" + bytesToHex(a),
-  A: "0x" + bytesToHex(A.toRawBytes().slice(1)),
+  sk: "0x" + bytesToHex(A_sk),
+  pk: "0x" + bytesToHex(A_pk.toRawBytes().slice(1)),
 });
-console.log("SharedSecret", { S: "0x" + S_b.toString(16) });
-console.log("BobsKeypair", {
-  P: "0x" + P_ba.x.toString(16),
-  p: "0x" + p.toString(16),
+console.log("SharedSecret", { S: "0x" + S_1.toString(16) });
+console.log("BobsAddress", {
+  sk: "0x" + P_sk.toString(16),
+  pk: "0x" + bytesToHex(P_pk),
+  address: "0x" + P_address,
 });
