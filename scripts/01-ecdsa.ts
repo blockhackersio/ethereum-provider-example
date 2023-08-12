@@ -4,16 +4,16 @@ import { keccak_256 } from "@noble/hashes/sha3";
 import assert from "assert";
 
 async function main() {
-  // Get the secret key
+  // Private Key
   const sk =
     0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80n;
 
-  // Generate the public key
+  // Public Key
   const pk = secp256k1.ProjectivePoint.BASE.multiply(sk)
-    .toRawBytes(false) // false here means uncompressed which adds 0x04 to start of bytes
+    .toRawBytes(false)
     .slice(1);
 
-  // Public keys are not addresses this is how we get our address
+  // Address
   const address = "0x" + bytesToHex(keccak_256(pk).slice(-20));
 
   assert("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266" === address);
