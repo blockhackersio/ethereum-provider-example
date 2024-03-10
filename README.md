@@ -1,6 +1,6 @@
 # 🥩 Ethereum in the Raw 🫢
 
-This repo explores raw ethereum interactions and cryptography. It is partially in order to understand the protocol better at a deeper level myself but also to inform future projects I undertake. 
+This repo explores raw ethereum interactions and cryptography. It is partially in order to understand the protocol better at a deeper level myself but also to inform future projects I undertake.
 
 - [x] [Original Diffie Hellman (modular arithetic)](scripts/00-diffie-hellman.ts)
 - [x] [Elliptic Curve Diffie Hellman](scripts/01-ec-diffie-hellman.ts)
@@ -18,4 +18,4 @@ This repo explores raw ethereum interactions and cryptography. It is partially i
 - [ ] KZG commitment
 - [ ] Zero Knowledge Proof
 
-_Note this code is for illustrative purposes only and is not production code and is not meant to be used for production in anyway._
+_Please note that this does not fully cover all the checks and error handling that should be done in a production environment. This code is exclusively for illustrative purposes only and is not production code and is not meant to be used for production in anyway._
